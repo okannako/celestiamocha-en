@@ -1,4 +1,4 @@
-<img width="2752" height="1536" alt="mm" src="https://github.com/user-attachments/assets/603ad85b-4e51-4002-9d6b-1f469e0df424" />
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/ed6c82c8-9635-4f3e-ae75-98bddd8dec19" />
 
 * The Celestia Mocha testnet has been actively running for a long time, and since development is ongoing, it will keep running for the foreseeable future. The network is currently running as mocha-5 (validators from mocha-4 were not migrated and need to be created again on mocha-5).
 
