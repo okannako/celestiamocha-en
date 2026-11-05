@@ -2,7 +2,7 @@
 
 * The Celestia Mocha testnet has been actively running for a long time, and since development is ongoing, it will keep running for the foreseeable future. The network is currently running as mocha-5 (validators from mocha-4 were not migrated and need to be created again on mocha-5).
 
-* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v10.5.0-mocha-mocha, celestia-node v0.34.4-mocha-mocha).
+* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v10.6.0-mocha-mocha, celestia-node v0.34.4-mocha-mocha).
 
 * The Full Storage Node type has been removed from celestia-node. If you want to keep all data, run a Bridge Node with --archival.
 
@@ -44,7 +44,7 @@ cd $HOME
 rm -rf celestia-app
 git clone https://github.com/celestiaorg/celestia-app.git
 cd celestia-app/
-APP_VERSION=v10.5.0-mocha
+APP_VERSION=v10.6.0-mocha
 git checkout tags/$APP_VERSION -b $APP_VERSION
 make install
 celestia-appd version
@@ -162,8 +162,8 @@ NOTE: You can follow everything on the network and your tx results on [Explorer]
 - Fibre is downloaded from the same release as celestia-app.
 ```
 cd $HOME
-wget https://github.com/celestiaorg/celestia-app/releases/download/v10.5.0-mocha/fibre_Linux_x86_64.tar.gz
-wget https://github.com/celestiaorg/celestia-app/releases/download/v10.5.0-mocha/checksums.txt
+wget https://github.com/celestiaorg/celestia-app/releases/download/v10.6.0-mocha/fibre_Linux_x86_64.tar.gz
+wget https://github.com/celestiaorg/celestia-app/releases/download/v10.6.0-mocha/checksums.txt
 sha256sum --ignore-missing --check checksums.txt
 tar -xzf fibre_Linux_x86_64.tar.gz
 sudo mv fibre /usr/local/bin/
@@ -235,6 +235,57 @@ celestia-appd config sync --fibre-home /data/fibre
 sudo systemctl restart fibre
 ```
 
+
+## Upgrading (Validator and Fibre)
+
+- This section upgrades a validator and Fibre server installed with this guide to a new release. Latest upgrade: **v10.6.0-mocha**. For future upgrades, you only need to change the APP_VERSION line.
+- We build and download the new release first and restart the services after, so your node is down for only a few seconds.
+
+### Upgrading celestia-app
+```
+APP_VERSION=v10.6.0-mocha
+cd $HOME/celestia-app
+git fetch --tags
+git checkout -f tags/$APP_VERSION
+make install
+celestia-appd version
+```
+
+- If the version is correct, restart the node.
+```
+sudo systemctl restart celestia-appd && sudo journalctl -u celestia-appd -f
+```
+
+### Upgrading Fibre
+- Fibre is downloaded from the same release as celestia-app. If you keep Fibre data somewhere other than /data/fibre, replace /data/fibre in the commands with your own folder.
+```
+APP_VERSION=v10.6.0-mocha
+cd $HOME
+wget https://github.com/celestiaorg/celestia-app/releases/download/$APP_VERSION/fibre_Linux_x86_64.tar.gz
+wget https://github.com/celestiaorg/celestia-app/releases/download/$APP_VERSION/checksums.txt
+sha256sum --ignore-missing --check checksums.txt
+tar -xzf fibre_Linux_x86_64.tar.gz
+rm fibre_Linux_x86_64.tar.gz checksums.txt
+```
+
+- If the checksum check says OK, stop Fibre, replace the binary and sync the settings.
+```
+sudo systemctl stop fibre
+sudo mv fibre /usr/local/bin/
+fibre version
+celestia-appd config sync --fibre-home /data/fibre --dry-run
+celestia-appd config sync --fibre-home /data/fibre
+sudo systemctl start fibre && sudo journalctl -u fibre -f
+```
+
+### Checking the Upgrade
+- The node should be synced (false) and your Fibre address should still be registered (found: true).
+```
+celestia-appd status 2>&1 | jq .sync_info.catching_up
+celestia-appd query valaddr provider $(celestia-appd comet show-address)
+```
+
+- If you use celestiawatch, you can check everything at once with `sudo celestiawatch doctor`.
 
 ## Bridge Node Minimum System Requirements
 
