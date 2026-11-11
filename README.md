@@ -2,7 +2,7 @@
 
 * The Celestia Mocha testnet has been actively running for a long time, and since development is ongoing, it will keep running for the foreseeable future. The network is currently running as mocha-5 (validators from mocha-4 were not migrated and need to be created again on mocha-5).
 
-* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v10.6.0-mocha-mocha, celestia-node v0.34.4-mocha-mocha).
+* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v10.6.0-mocha, celestia-node v0.35.0-mocha).
 
 * The Full Storage Node type has been removed from celestia-node. If you want to keep all data, run a Bridge Node with --archival.
 
@@ -27,7 +27,7 @@ sudo apt install make -y
 
 ### Installing Go
 ```
-ver="1.26.9"
+ver="1.26.10"
 cd $HOME
 wget "https://go.dev/dl/go$ver.linux-amd64.tar.gz"
 sudo rm -rf /usr/local/go
@@ -304,7 +304,7 @@ sudo apt install make -y
 
 ### Installing Go
 ```
-ver="1.26.9"
+ver="1.26.10"
 cd $HOME
 wget "https://go.dev/dl/go$ver.linux-amd64.tar.gz"
 sudo rm -rf /usr/local/go
@@ -321,13 +321,13 @@ cd $HOME
 rm -rf celestia-node
 git clone https://github.com/celestiaorg/celestia-node.git
 cd celestia-node/
-git checkout tags/v0.34.4-mocha
+git checkout tags/v0.35.0-mocha
 make build
 make install
 make cel-key
 ```
 
-- Version check ```celestia version``` >>> v0.34.4-mocha
+- Version check ```celestia version``` >>> v0.35.0-mocha
 
 ### Init
 - If you run your own consensus node, use its IP instead of rpc-mocha.pops.one (gRPC must be enabled on that node).
@@ -425,7 +425,7 @@ sudo apt install make -y
 
 ### Installing Go
 ```
-ver="1.26.9"
+ver="1.26.10"
 cd $HOME
 wget "https://go.dev/dl/go$ver.linux-amd64.tar.gz"
 sudo rm -rf /usr/local/go
@@ -442,7 +442,7 @@ cd $HOME
 rm -rf celestia-node
 git clone https://github.com/celestiaorg/celestia-node.git
 cd celestia-node/
-git checkout tags/v0.34.4-mocha
+git checkout tags/v0.35.0-mocha
 make build
 make install
 make cel-key
@@ -503,6 +503,51 @@ sudo systemctl disable celestia-light
 sudo rm /etc/systemd/system/celestia-light.service
 rm -rf $HOME/celestia-node
 rm -rf $HOME/.celestia-light-mocha-5
+```
+
+## Upgrading Bridge and Light Nodes
+
+- This section upgrades a Bridge or Light Node installed with this guide to a new release. Latest upgrade: **v0.35.0-mocha**. For future upgrades, you only need to change the NODE_VERSION line.
+- v0.35.0-mocha removes Bitswap in favor of shrex, adds JWT token revocation and includes security and stability fixes. No coordinated upgrade is required, you can upgrade at any time.
+
+### Upgrading Go
+- Building v0.35.0-mocha requires Go 1.26.10 or later. If `go version` already shows 1.26.10 or later, skip this step.
+```
+ver="1.26.10"
+cd $HOME
+wget "https://go.dev/dl/go$ver.linux-amd64.tar.gz"
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf "go$ver.linux-amd64.tar.gz"
+rm "go$ver.linux-amd64.tar.gz"
+source $HOME/.bash_profile
+go version
+```
+
+### Upgrading celestia-node
+```
+NODE_VERSION=v0.35.0-mocha
+cd $HOME/celestia-node
+git fetch --tags
+git checkout -f tags/$NODE_VERSION
+make build
+make install
+make cel-key
+celestia version
+```
+
+### For Bridge Nodes
+- Stop the node, update its config to the new release, then start it again.
+```
+sudo systemctl stop celestia-bridge
+celestia bridge config-update --p2p.network mocha
+sudo systemctl start celestia-bridge && sudo journalctl -u celestia-bridge -f
+```
+
+### For Light Nodes
+```
+sudo systemctl stop celestia-light
+celestia light config-update --p2p.network mocha
+sudo systemctl start celestia-light && sudo journalctl -u celestia-light -f
 ```
 
 ### Enabling bbr (Required)
