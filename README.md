@@ -2,7 +2,7 @@
 
 * The Celestia Mocha testnet has been actively running for a long time, and since development is ongoing, it will keep running for the foreseeable future. The network is currently running as mocha-5 (validators from mocha-4 were not migrated and need to be created again on mocha-5).
 
-* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v10.6.0-mocha, celestia-node v0.35.0-mocha).
+* Follow this guide step by step to run a Validator, Fibre, Bridge and Light Node on the testnet and contribute to the network. The guide is based on the current releases (celestia-app v11.0.0-mocha, celestia-node v0.36.0-mocha).
 
 * The Full Storage Node type has been removed from celestia-node. If you want to keep all data, run a Bridge Node with --archival.
 
@@ -44,7 +44,7 @@ cd $HOME
 rm -rf celestia-app
 git clone https://github.com/celestiaorg/celestia-app.git
 cd celestia-app/
-APP_VERSION=v10.6.0-mocha
+APP_VERSION=v11.0.0-mocha
 git checkout tags/$APP_VERSION -b $APP_VERSION
 make install
 celestia-appd version
@@ -162,8 +162,8 @@ NOTE: You can follow everything on the network and your tx results on [Explorer]
 - Fibre is downloaded from the same release as celestia-app.
 ```
 cd $HOME
-wget https://github.com/celestiaorg/celestia-app/releases/download/v10.6.0-mocha/fibre_Linux_x86_64.tar.gz
-wget https://github.com/celestiaorg/celestia-app/releases/download/v10.6.0-mocha/checksums.txt
+wget https://github.com/celestiaorg/celestia-app/releases/download/v11.0.0-mocha/fibre_Linux_x86_64.tar.gz
+wget https://github.com/celestiaorg/celestia-app/releases/download/v11.0.0-mocha/checksums.txt
 sha256sum --ignore-missing --check checksums.txt
 tar -xzf fibre_Linux_x86_64.tar.gz
 sudo mv fibre /usr/local/bin/
@@ -238,12 +238,14 @@ sudo systemctl restart fibre
 
 ## Upgrading (Validator and Fibre)
 
-- This section upgrades a validator and Fibre server installed with this guide to a new release. Latest upgrade: **v10.6.0-mocha**. For future upgrades, you only need to change the APP_VERSION line.
+- This section upgrades a validator and Fibre server installed with this guide to a new release. Latest upgrade: **v11.0.0-mocha**. For future upgrades, you only need to change the APP_VERSION line.
+- **v11.0.0-mocha is a coordinated (required) upgrade.** All validators must install it. The new binary keeps running the current version until the network switches to v11, which happens 2 days after 5/6+ of the voting power has signaled. So install it now instead of waiting.
+- v11 restricts the accounts whose keys were exposed in the Keplr/Web3Auth social-login incident: they can only move funds to one whitehat recovery address. On Mocha the list holds three test accounts.
 - We build and download the new release first and restart the services after, so your node is down for only a few seconds.
 
 ### Upgrading celestia-app
 ```
-APP_VERSION=v10.6.0-mocha
+APP_VERSION=v11.0.0-mocha
 cd $HOME/celestia-app
 git fetch --tags
 git checkout -f tags/$APP_VERSION
@@ -259,7 +261,7 @@ sudo systemctl restart celestia-appd && sudo journalctl -u celestia-appd -f
 ### Upgrading Fibre
 - Fibre is downloaded from the same release as celestia-app. If you keep Fibre data somewhere other than /data/fibre, replace /data/fibre in the commands with your own folder.
 ```
-APP_VERSION=v10.6.0-mocha
+APP_VERSION=v11.0.0-mocha
 cd $HOME
 wget https://github.com/celestiaorg/celestia-app/releases/download/$APP_VERSION/fibre_Linux_x86_64.tar.gz
 wget https://github.com/celestiaorg/celestia-app/releases/download/$APP_VERSION/checksums.txt
@@ -321,13 +323,13 @@ cd $HOME
 rm -rf celestia-node
 git clone https://github.com/celestiaorg/celestia-node.git
 cd celestia-node/
-git checkout tags/v0.35.0-mocha
+git checkout tags/v0.36.0-mocha
 make build
 make install
 make cel-key
 ```
 
-- Version check ```celestia version``` >>> v0.35.0-mocha
+- Version check ```celestia version``` >>> v0.36.0-mocha
 
 ### Init
 - If you run your own consensus node, use its IP instead of rpc-mocha.pops.one (gRPC must be enabled on that node).
@@ -442,7 +444,7 @@ cd $HOME
 rm -rf celestia-node
 git clone https://github.com/celestiaorg/celestia-node.git
 cd celestia-node/
-git checkout tags/v0.35.0-mocha
+git checkout tags/v0.36.0-mocha
 make build
 make install
 make cel-key
@@ -507,11 +509,11 @@ rm -rf $HOME/.celestia-light-mocha-5
 
 ## Upgrading Bridge and Light Nodes
 
-- This section upgrades a Bridge or Light Node installed with this guide to a new release. Latest upgrade: **v0.35.0-mocha**. For future upgrades, you only need to change the NODE_VERSION line.
-- v0.35.0-mocha removes Bitswap in favor of shrex, adds JWT token revocation and includes security and stability fixes. No coordinated upgrade is required, you can upgrade at any time.
+- This section upgrades a Bridge or Light Node installed with this guide to a new release. Latest upgrade: **v0.36.0-mocha**. For future upgrades, you only need to change the NODE_VERSION line.
+- **v0.36.0-mocha is a required upgrade.** It adds support for celestia-app v11. Bridge and Light Nodes on older versions will stop working once v11 is activated, so upgrade before then.
 
 ### Upgrading Go
-- Building v0.35.0-mocha requires Go 1.26.10 or later. If `go version` already shows 1.26.10 or later, skip this step.
+- Building celestia-node requires Go 1.26.10 or later. If `go version` already shows 1.26.10 or later, skip this step.
 ```
 ver="1.26.10"
 cd $HOME
@@ -525,7 +527,7 @@ go version
 
 ### Upgrading celestia-node
 ```
-NODE_VERSION=v0.35.0-mocha
+NODE_VERSION=v0.36.0-mocha
 cd $HOME/celestia-node
 git fetch --tags
 git checkout -f tags/$NODE_VERSION
